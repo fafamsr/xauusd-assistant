@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="description" content="Assistant personnel d'analyse XAUUSD">
+  <title>XAUUSD Assistant</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">Au</div>
+    <div><div class="brand">XAUUSD <span>ASSISTANT</span></div><div class="subbrand">Analyse manuelle · Aucun ordre exécuté</div></div>
+    <div class="status"><i></i> À la demande</div>
+  </header>
+
+  <main>
+    <section class="hero panel">
+      <div class="eyebrow">TON ASSISTANT DE TRADING</div>
+      <h1>Comprends le marché.<br><em>Décide avec méthode.</em></h1>
+      <p>Prépare une analyse de l'or avec ChatGPT, les actualités et ton graphique MT5.</p>
+      <button id="analyze" class="primary"><span>↗</span> ANALYSER XAUUSD</button>
+      <p class="micro">Le bouton ouvre ChatGPT avec une demande d'analyse préremplie. Vérifie toujours les cours et les sources.</p>
+    </section>
+
+    <section class="grid">
+      <article class="panel stat"><div class="label">ACTIF</div><div class="value">XAUUSD</div><div class="hint">Or / Dollar US</div></article>
+      <article class="panel stat"><div class="label">UNITÉ PRINCIPALE</div><div class="value">M15</div><div class="hint">Contexte H1 / H4</div></article>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><div><div class="eyebrow">VOTRE PROCESSUS</div><h2>Avant un signal</h2></div><span class="pill">Checklist</span></div>
+      <label class="check"><input type="checkbox"> <span>Prix et heure de cotation vérifiés</span></label>
+      <label class="check"><input type="checkbox"> <span>Tendance H1 / H4 cohérente</span></label>
+      <label class="check"><input type="checkbox"> <span>Confirmation M15 et niveaux identifiés</span></label>
+      <label class="check"><input type="checkbox"> <span>Actualités à fort impact vérifiées</span></label>
+      <label class="check"><input type="checkbox"> <span>SL, objectifs et risque calculés</span></label>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><div><div class="eyebrow">RACCOURCIS</div><h2>Actions rapides</h2></div></div>
+      <button class="secondary" id="news">📰 Analyser les actualités et leur impact sur l'or</button>
+      <button class="secondary" id="screenshot">📊 J'ai une capture MT5 à analyser</button>
+      <button class="secondary" id="risk">🛡️ Vérifier mon plan et mon risque</button>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><div><div class="eyebrow">JOURNAL LOCAL</div><h2>Mes notes</h2></div><span class="pill">Sur cet appareil</span></div>
+      <textarea id="notes" rows="4" placeholder="Note ici ton scénario, le prix observé et les raisons de ta décision..."></textarea>
+      <div class="row"><button id="save" class="secondary small">Enregistrer la note</button><button id="clear" class="text-button">Effacer</button></div>
+      <div id="saved" class="saved"></div>
+    </section>
+
+    <section class="warning">
+      <strong>Important</strong>
+      <p>Cette application ne récupère pas elle-même les cours en direct et ne surveille pas le marché en arrière-plan. Elle prépare des demandes à envoyer à ChatGPT. Aucun ordre n'est transmis au courtier. Les signaux ne garantissent aucun gain.</p>
+    </section>
+  </main>
+  <footer>Conçu pour iPhone et iPad · Version gratuite</footer>
+  <script src="app.js"></script>
+</body>
+</html>
