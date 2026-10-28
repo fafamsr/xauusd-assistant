@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='xauusd-fafa-v8-0-static';
+const CACHE='xauusd-fafa-v8-2-static';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./logo.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('xauusd-fafa-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})()));

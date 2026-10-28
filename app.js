@@ -1,7 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const API = 'https://biquote.io/api';
-const VERSION = 'FAFA-8.0.0';
+const VERSION = 'FAFA-8.2.0';
 const NEWS_API = `${API}/calendar/upcoming?limit=100&importance=high&countries=US`;
 const NEWS_BLOCK_BEFORE_MIN = 30;
 const NEWS_BLOCK_AFTER_MIN = 15;
@@ -31,9 +31,10 @@ async function getNews(){
     const title=String(x.eventName||x.event||x.name||x.title||'Annonce économique');
     return {at:d.getTime(),time:d.toISOString(),impact,high,country,title};
   }).filter(Boolean);
-  if(rows.length && events.length===0)throw Error('Calendrier reçu mais aucun horaire exploitable. NO TRADE.');
+  if(!Array.isArray(rows)||rows.length===0)throw Error('Calendrier vide ou indisponible : impossible de confirmer les annonces. NO TRADE.');
+  if(events.length===0)throw Error('Calendrier reçu mais aucun horaire exploitable. NO TRADE.');
   const relevant=events.filter(e=>(e.country==='US'||e.country==='USD'||e.country==='UNITED STATES'||e.country==='UNITED STATES OF AMERICA')&&e.high);
-  if(events.length>0 && relevant.length===0)throw Error('Le calendrier a renvoyé des événements, mais aucun n’a pu être identifié comme annonce US à fort impact. Format ou filtre non vérifiable : NO TRADE.');
+  if(relevant.length===0)throw Error('Aucune annonce américaine à fort impact n’a pu être confirmée dans la réponse. Le calendrier peut être incomplet ou son format a changé : NO TRADE.');
   const blocked=relevant.filter(e=>now>=e.at-NEWS_BLOCK_BEFORE_MIN*60000&&now<=e.at+NEWS_BLOCK_AFTER_MIN*60000);
   return {events:relevant,blocked,checkedAt:now,source:'biquote.io economic calendar'};
 }
@@ -59,8 +60,41 @@ else {why.push(`Confluence insuffisante : M30 ${m30.signal}, M15 ${m15.signal}, 
 if(!newsKnown){decision='NO TRADE';why.push('Calendrier économique non vérifié : filtre actualités incomplet.');}
 if(news.blocked.length){decision='NO TRADE';why.push('Annonce(s) américaine(s) à fort impact dans la fenêtre de sécurité : '+news.blocked.map(e=>e.title).join(', ')+'.');}
 const spread=num(tick.spread)?+tick.spread:(num(tick.ask)&&num(tick.bid)?+tick.ask-+tick.bid:NaN);if(!Number.isFinite(spread)||spread<0||spread>Math.max(1.5,(m5.aa||0)*0.2)){decision='NO TRADE';why.push('Spread manquant ou trop élevé par rapport à la volatilité.');}
-let entry=null,sl=null,tp1=null,tp2=null,tp3=null,rr='—';if(decision!=='NO TRADE'){entry=decision==='BUY'?(num(tick.ask)?+tick.ask:mid):(num(tick.bid)?+tick.bid:mid);const buffer=Math.max((m5.aa||0)*0.25,spread*2);if(!(m5.aa>0)||!Number.isFinite(m5.aa)||!Number.isFinite(m5.st.support)||!Number.isFinite(m5.st.resistance)||!Number.isFinite(m15.st.support)||!Number.isFinite(m15.st.resistance))throw Error('ATR ou niveaux structurels invalides : aucun niveau SL/TP calculé. NO TRADE.');
-if(decision==='BUY'){sl=Math.min(m5.st.support,entry-1.2*m5.aa)-buffer;if(!(sl<entry))throw Error('Stop-loss achat invalide; NO TRADE.');const risk=entry-sl;tp1=entry+1.5*risk;tp2=entry+2*risk;const structural=m15.st.resistance>tp2?m15.st.resistance:entry+3*risk;tp3=Math.max(tp2,Math.min(entry+3*risk,structural));}
-else{sl=Math.max(m5.st.resistance,entry+1.2*m5.aa)+buffer;if(!(sl>entry))throw Error('Stop-loss vente invalide; NO TRADE.');const risk=sl-entry;tp1=entry-1.5*risk;tp2=entry-2*risk;const structural=m15.st.support<tp2?m15.st.support:entry-3*risk;tp3=Math.min(tp2,Math.max(entry-3*risk,structural));}rr='cible initiale ≥ 1:1,5';}
-const cls=decision==='BUY'?'buy':decision==='SELL'?'sell':'none';$('result').innerHTML=`<h2>Analyse ${VERSION}</h2><div class="warn">Signal technique expérimental, pas une probabilité de gain. Le calendrier est interrogé, mais sa disponibilité et son exhaustivité ne sont pas garanties; tout échec bloque l’analyse.</div><div class="decision ${cls}">${decision}</div><p>${why.map(safeText).join('<br>')}</p><div class="grid"><div class="metric"><small>Cours mid</small><strong>${fmt(mid)} USD</strong></div><div class="metric"><small>Spread</small><strong>${fmt(spread)}</strong></div><div class="metric"><small>Entrée indicative</small><strong>${fmt(entry)}</strong></div><div class="metric"><small>Stop-loss</small><strong>${fmt(sl)}</strong></div><div class="metric"><small>TP1</small><strong>${fmt(tp1)}</strong></div><div class="metric"><small>TP2 / TP3</small><strong>${fmt(tp2)} / ${fmt(tp3)}</strong></div><div class="metric"><small>Qualité données</small><strong>Contrôles réussis</strong></div><div class="metric"><small>Filtre actualités</small><strong>${news.blocked.length?'Blocage actif':'Calendrier reçu'}</strong></div></div><h2>Analyse par timeframe</h2><div class="frames">${xs.map(card).join('')}</div><h2>Contrôles et limites</h2><ul><li>Prix comparé à la dernière clôture M5.</li><li>Uniquement les bougies marquées clôturées sont utilisées.</li><li>Le spread est vérifié avant toute entrée.</li><li>Calendrier US haute importance vérifié au moment de l’analyse; blocage ±${NEWS_BLOCK_BEFORE_MIN}/${NEWS_BLOCK_AFTER_MIN} min autour des annonces connues.</li><li>La source peut différer du broker MT5.</li></ul>`;$('status').textContent=`${VERSION} · ${decision} · données, spread et calendrier contrôlés`;  $('price').textContent=`${fmt(mid)} USD`;$('freshness').textContent=`Âge du tick : ${Math.round(+tick.quoteAgeSeconds)} s · ${tick.source||'API'}`;$('updated').textContent='Analyse : '+new Date().toLocaleString('fr-FR');}catch(e){renderFailure(e);}finally{btn.disabled=false;btn.textContent='ANALYSER XAUUSD';}}
-$('analyze').addEventListener('click',analyze);loadPrice();setInterval(loadPrice,60000);if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=7.1.0').catch(()=>{});
+let entry=null,sl=null,tp1=null,tp2=null,tp3=null,rr='—';
+if(decision!=='NO TRADE'){
+  entry=decision==='BUY'?(num(tick.ask)?+tick.ask:mid):(num(tick.bid)?+tick.bid:mid);
+  const atr5=m5.aa, buffer=Math.max(atr5*0.20,spread*2);
+  if(!(atr5>0)||![m5.st.support,m5.st.resistance,m15.st.support,m15.st.resistance,m30.st.support,m30.st.resistance].every(Number.isFinite)){
+    decision='NO TRADE';why.push('ATR ou niveaux structurels manquants : niveaux de risque refusés.');entry=null;
+  } else {
+    if(decision==='BUY'){
+      const structuralSL=m5.st.support-buffer;
+      sl=Math.min(structuralSL,entry-1.2*atr5);
+      const risk=entry-sl;
+      if(!(sl<entry)||!Number.isFinite(risk)||risk>2.5*atr5){decision='NO TRADE';why.push('Stop technique trop éloigné ou incohérent (> 2,5 ATR) : aucun trade.');entry=sl=tp1=tp2=tp3=null;}
+      else {
+        const obstacles=[m5.st.resistance,m15.st.resistance,m30.st.resistance].filter(x=>Number.isFinite(x)&&x>entry+spread).sort((a,b)=>a-b);
+        const clean=obstacles.map(x=>x-buffer).filter(x=>x>entry);
+        const raw=[entry+1.5*risk,entry+2*risk,entry+3*risk];
+        const targets=raw.map((t,i)=>{const obstacle=clean[i];return obstacle===undefined?t:Math.min(t,obstacle);});
+        if(targets[0]-entry<1.2*risk||targets[1]<=targets[0]||targets[2]<=targets[1]){decision='NO TRADE';why.push('Résistance proche : aucun ensemble de TP ne respecte les critères de rendement et d’ordre des objectifs.');entry=sl=tp1=tp2=tp3=null;}
+        else {[tp1,tp2,tp3]=targets;rr=`TP1 ${((tp1-entry)/risk).toFixed(2)}R`;}
+      }
+    } else {
+      const structuralSL=m5.st.resistance+buffer;
+      sl=Math.max(structuralSL,entry+1.2*atr5);
+      const risk=sl-entry;
+      if(!(sl>entry)||!Number.isFinite(risk)||risk>2.5*atr5){decision='NO TRADE';why.push('Stop technique trop éloigné ou incohérent (> 2,5 ATR) : aucun trade.');entry=sl=tp1=tp2=tp3=null;}
+      else {
+        const obstacles=[m5.st.support,m15.st.support,m30.st.support].filter(x=>Number.isFinite(x)&&x<entry-spread).sort((a,b)=>b-a);
+        const clean=obstacles.map(x=>x+buffer).filter(x=>x<entry);
+        const raw=[entry-1.5*risk,entry-2*risk,entry-3*risk];
+        const targets=raw.map((t,i)=>{const obstacle=clean[i];return obstacle===undefined?t:Math.max(t,obstacle);});
+        if(entry-targets[0]<1.2*risk||targets[1]>=targets[0]||targets[2]>=targets[1]){decision='NO TRADE';why.push('Support proche : aucun ensemble de TP ne respecte les critères de rendement et d’ordre des objectifs.');entry=sl=tp1=tp2=tp3=null;}
+        else {[tp1,tp2,tp3]=targets;rr=`TP1 ${((entry-tp1)/risk).toFixed(2)}R`;}
+      }
+    }
+  }
+}
+const cls=decision==='BUY'?'buy':decision==='SELL'?'sell':'none';$('result').innerHTML=`<h2>Analyse ${VERSION}</h2><div class="warn">Signal technique expérimental, pas une probabilité de gain. Le graphique TradingView utilise OANDA:XAUUSD, tandis que les calculs utilisent le flux Biquote : les cotations peuvent différer. Le calendrier doit renvoyer des événements US à fort impact exploitables ; sinon l’analyse est bloquée. Sa disponibilité et son exhaustivité ne sont pas garanties.</div><div class="decision ${cls}">${decision}</div><p>${why.map(safeText).join('<br>')}</p><div class="grid"><div class="metric"><small>Cours mid</small><strong>${fmt(mid)} USD</strong></div><div class="metric"><small>Spread</small><strong>${fmt(spread)}</strong></div><div class="metric"><small>Entrée indicative</small><strong>${fmt(entry)}</strong></div><div class="metric"><small>Stop-loss</small><strong>${fmt(sl)}</strong></div><div class="metric"><small>TP1</small><strong>${fmt(tp1)}</strong></div><div class="metric"><small>TP2 / TP3</small><strong>${fmt(tp2)} / ${fmt(tp3)}</strong></div><div class="metric"><small>Rendement/risque TP1</small><strong>${rr}</strong></div><div class="metric"><small>Qualité données</small><strong>Contrôles internes réussis</strong></div><div class="metric"><small>Filtre actualités</small><strong>${news.blocked.length?'Blocage actif':'Calendrier reçu'}</strong></div></div><h2>Analyse par timeframe</h2><div class="frames">${xs.map(card).join('')}</div><h2>Contrôles et limites</h2><ul><li>Prix comparé à la dernière clôture M5.</li><li>Uniquement les bougies marquées clôturées sont utilisées.</li><li>Le spread est vérifié avant toute entrée.</li><li>SL limité à 2,5 ATR ; TP ajustés aux obstacles structurels M5/M15/M30. Si le rendement minimal ou l’ordre des objectifs n’est pas respecté, le signal est rétrogradé en NO TRADE.</li><li>Calendrier US haute importance vérifié au moment de l’analyse; blocage ±${NEWS_BLOCK_BEFORE_MIN}/${NEWS_BLOCK_AFTER_MIN} min autour des annonces connues.</li><li>La source peut différer du broker MT5.</li></ul>`;$('status').textContent=`${VERSION} · ${decision} · données, spread et calendrier contrôlés`;  $('price').textContent=`${fmt(mid)} USD`;$('freshness').textContent=`Âge du tick : ${Math.round(+tick.quoteAgeSeconds)} s · ${tick.source||'API'}`;$('updated').textContent='Analyse : '+new Date().toLocaleString('fr-FR');}catch(e){renderFailure(e);}finally{btn.disabled=false;btn.textContent='ANALYSER XAUUSD';}}
+$('analyze').addEventListener('click',analyze);loadPrice();setInterval(loadPrice,60000);if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=8.1.0').catch(()=>{});

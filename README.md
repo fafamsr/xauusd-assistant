@@ -25,3 +25,10 @@ Cette application est un outil d'analyse expérimental, pas un système de tradi
 - Amélioration du traitement du calendrier : une réponse vide valide ne bloque pas automatiquement le moteur ; un format incohérent reste bloquant.
 - Vérifications réseau en direct, disponibilité CORS, calendrier, correspondance avec le broker et site publié non confirmés depuis cet environnement.
 - Cette version est prête à être installée pour des tests contrôlés, mais pas certifiée pour le trading réel. Ne pas considérer les signaux comme validés avant une phase de démonstration et un journal des résultats.
+
+
+## Correction des niveaux (v8.2)
+- SL technique combinant structure M5 et ATR, avec refus si la distance dépasse 2,5 ATR.
+- TP ajustés aux obstacles structurels détectés en M5/M15/M30.
+- Si le TP1 ne conserve pas au moins 1,2R, ou si les objectifs ne sont pas ordonnés correctement, le signal devient NO TRADE.
+- Ces règles sont expérimentales et doivent être validées en backtest puis en démo. Elles ne garantissent pas un taux de réussite.
