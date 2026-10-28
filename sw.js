@@ -1,4 +1,6 @@
-const C='xauusd-fafa-auto-v4-root-logos';
-self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./logo.png','./icon-192.png','./icon-512.png']))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('xauusd-fafa-')&&k!==C).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(new URL(e.request.url).origin!==location.origin)return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
+'use strict';
+const CACHE='xauusd-fafa-v8-0-static';
+const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./logo.png','./icon-192.png','./icon-512.png'];
+self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting();})()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('xauusd-fafa-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})()));
+self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(u.origin!==location.origin||event.request.method!=='GET')return;const isCode=/\/(app\.js|index\.html|styles\.css|sw\.js)$/.test(u.pathname);if(isCode){event.respondWith((async()=>{try{const fresh=await fetch(event.request,{cache:'no-store'});if(fresh.ok){const c=await caches.open(CACHE);await c.put(event.request,fresh.clone());}return fresh;}catch(e){return (await caches.match(event.request))||Response.error();}})());return;}event.respondWith((async()=>{const cached=await caches.match(event.request);if(cached)return cached;try{return await fetch(event.request);}catch(e){return Response.error();}})());});
