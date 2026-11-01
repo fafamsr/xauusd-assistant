@@ -1,34 +1,30 @@
-# XAUUSD FAFA v8.0.0
+# XAUUSD FAFA — v8.4.0
+
+Application web mobile statique, conçue pour GitHub Pages et iPhone/iPad. Elle produit des analyses indicatives uniquement : elle n’envoie aucun ordre.
+
+## Évolutions v8.4.0
+- Contexte supérieur H1 synthétisé à partir de paires de bougies M30 clôturées.
+- Analyse H1 / M30 / M15 / M5.
+- Indicateurs : EMA 20/50/200 (si historique suffisant), RSI 14, MACD, ADX 14 et ATR 14.
+- Structure de marché : supports/résistances récents, séquences de sommets/creux et balayages de liquidité simplifiés. Ce n’est pas une détection institutionnelle certifiée des Order Blocks/FVG.
+- Filtre d’extension : bloque une vente si RSI M5/M15 est en survente et un achat en surachat, en demandant un pullback/rejet.
+- Contrôle du stop (2,5 ATR), des obstacles structurels et d’un TP1 minimal (1,2R).
+- Justification explicite de NO TRADE et affichage de la session de marché.
+- Journal local des analyses (100 dernières), sans prétendre mesurer un win rate.
+- Tick indisponible : affichage éventuel de la dernière clôture, mais aucun signal exécutable.
+- Service worker et version des ressources actualisés.
 
 ## Installation
-1. Sauvegarde le dépôt GitHub actuel.
-2. Décompresse cette archive. Les fichiers sont directement à la racine de l'archive : téléverse leur contenu à la racine du dépôt configuré pour GitHub Pages, sans créer un dossier parent.
-3. Remplace les fichiers existants et valide le commit.
-4. Ouvre https://fafamsr.github.io/xauusd-assistant/ et lance « ANALYSER XAUUSD ».
-5. Compare les cours et heures affichés avec ton flux MT5 avant toute interprétation.
+1. Décompresser l’archive.
+2. Remplacer les fichiers existants à la racine du dépôt GitHub Pages par les fichiers de l’archive.
+3. Attendre la publication GitHub Pages, puis actualiser le site.
+4. Vérifier que l’en-tête indique v8.4.0. Sur iPhone, fermer/réouvrir l’onglet si l’ancienne version reste en cache.
 
-## Fonctionnalités
-- Cotation XAUUSD et bougies M5/M15/M30 depuis l'API publique biquote.
-- Contrôles de fraîcheur du cours, cohérence OHLC, bougies clôturées, ordre temporel et écart entre cours et dernière clôture M5.
-- EMA20/50, RSI14, ATR14, support/résistance simples et score technique expérimental.
-- Filtre calendrier économique public biquote, événements US à fort impact ; si le flux ne peut pas être vérifié ou renvoie un format incohérent, l’analyse est bloquée. Une réponse vide valide est traitée comme absence d’événements retournés par la source, pas comme une garantie d’absence d’annonces. Fenêtre configurée : 30 minutes avant et 15 minutes après.
-- Contrôle du spread, SL/TP indicatifs si une confluence est détectée, sinon NO TRADE.
-- Pas d'exécution automatique d'ordres.
-- Cache statique versionné et chargement réseau prioritaire des fichiers de code.
-
-## Limites importantes
-Cette application est un outil d'analyse expérimental, pas un système de trading validé. Les signaux BUY/SELL ne doivent pas être utilisés avec de l'argent réel avant : tests en direct des API/CORS depuis GitHub Pages, comparaison avec le courtier, backtests sans fuite de données futures avec spread/slippage, tests hors échantillon et validation prolongée en démo. Les prix peuvent différer du courtier. Le calendrier peut être incomplet ou retardé. GitHub Pages ne fournit pas d'exécution serveur ni de notifications fiables en arrière-plan sur iOS.
-
-## Version préparée pour les tests utilisateur
-- Syntaxe JavaScript locale : app.js et sw.js.
-- Vérification des chemins d’assets, archive ZIP et fichiers présents.
-- Amélioration du traitement du calendrier : une réponse vide valide ne bloque pas automatiquement le moteur ; un format incohérent reste bloquant.
-- Vérifications réseau en direct, disponibilité CORS, calendrier, correspondance avec le broker et site publié non confirmés depuis cet environnement.
-- Cette version est prête à être installée pour des tests contrôlés, mais pas certifiée pour le trading réel. Ne pas considérer les signaux comme validés avant une phase de démonstration et un journal des résultats.
-
-
-## Correction des niveaux (v8.2)
-- SL technique combinant structure M5 et ATR, avec refus si la distance dépasse 2,5 ATR.
-- TP ajustés aux obstacles structurels détectés en M5/M15/M30.
-- Si le TP1 ne conserve pas au moins 1,2R, ou si les objectifs ne sont pas ordonnés correctement, le signal devient NO TRADE.
-- Ces règles sont expérimentales et doivent être validées en backtest puis en démo. Elles ne garantissent pas un taux de réussite.
+## Sources et limites
+- Bougies et tick : API publique Biquote (`https://biquote.io/api`).
+- Calendrier : endpoint public Biquote, annonces US classées haute importance. Il peut être incomplet ou indisponible ; dans ce cas l’analyse s’interrompt.
+- Graphique embarqué : TradingView OANDA:XAUUSD, qui peut différer du flux Biquote.
+- H1 est agrégé localement à partir de bougies M30 clôturées et n’est pas une cotation H1 native.
+- Le score technique n’est pas une probabilité de gain. Aucun backtest robuste ni validation hors échantillon n’est fourni. Tester en démo avant tout usage réel.
+- Le journal local stocke des décisions sur le navigateur, sans synchronisation entre appareils et sans suivi automatique des TP/SL.
+- Pas de promesse de rendement ni de taux de réussite.
