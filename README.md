@@ -1,8 +1,8 @@
-# XAUUSD FAFA — v8.4.0
+# XAUUSD FAFA — v8.5.0
 
 Application web mobile statique, conçue pour GitHub Pages et iPhone/iPad. Elle produit des analyses indicatives uniquement : elle n’envoie aucun ordre.
 
-## Évolutions v8.4.0
+## Évolutions v8.5.0
 - Contexte supérieur H1 synthétisé à partir de paires de bougies M30 clôturées.
 - Analyse H1 / M30 / M15 / M5.
 - Indicateurs : EMA 20/50/200 (si historique suffisant), RSI 14, MACD, ADX 14 et ATR 14.
@@ -18,7 +18,7 @@ Application web mobile statique, conçue pour GitHub Pages et iPhone/iPad. Elle 
 1. Décompresser l’archive.
 2. Remplacer les fichiers existants à la racine du dépôt GitHub Pages par les fichiers de l’archive.
 3. Attendre la publication GitHub Pages, puis actualiser le site.
-4. Vérifier que l’en-tête indique v8.4.0. Sur iPhone, fermer/réouvrir l’onglet si l’ancienne version reste en cache.
+4. Vérifier que l’en-tête indique v8.5.0. Sur iPhone, fermer/réouvrir l’onglet si l’ancienne version reste en cache.
 
 ## Sources et limites
 - Bougies et tick : API publique Biquote (`https://biquote.io/api`).
@@ -28,3 +28,8 @@ Application web mobile statique, conçue pour GitHub Pages et iPhone/iPad. Elle 
 - Le score technique n’est pas une probabilité de gain. Aucun backtest robuste ni validation hors échantillon n’est fourni. Tester en démo avant tout usage réel.
 - Le journal local stocke des décisions sur le navigateur, sans synchronisation entre appareils et sans suivi automatique des TP/SL.
 - Pas de promesse de rendement ni de taux de réussite.
+
+
+## Évolutions v8.5.0
+- Les setups en attente affichent un biais BUY/SELL, des niveaux prévisionnels (entrée, SL, TP1/TP2/TP3), une confirmation attendue et une invalidation indicative.
+- Les niveaux restent explicitement non confirmés et sont masqués si la cotation temps réel ou le spread sont indisponibles, ou pendant une fenêtre d’annonce US bloquante.
