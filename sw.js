@@ -1,6 +1,5 @@
-'use strict';
-const CACHE='xauusd-fafa-v8-5-0-static';
-const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./logo.png','./icon-192.png','./icon-512.png'];
-self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting();})()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('xauusd-fafa-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})()));
-self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(u.origin!==location.origin||event.request.method!=='GET')return;const isCode=/\/(app\.js|index\.html|styles\.css|sw\.js)$/.test(u.pathname);if(isCode){event.respondWith((async()=>{try{const fresh=await fetch(event.request,{cache:'no-store'});if(fresh.ok){const c=await caches.open(CACHE);await c.put(event.request,fresh.clone());}return fresh;}catch(e){return (await caches.match(event.request))||Response.error();}})());return;}event.respondWith((async()=>{const cached=await caches.match(event.request);if(cached)return cached;try{return await fetch(event.request);}catch(e){return Response.error();}})());});
+const CACHE='fafa-9.0.0-shell';
+const ASSETS=['./','./index.html','./styles.css?v=9.0.0','./app.js?v=9.0.0','./manifest.webmanifest','./icon-192.png','./icon-512.png','./logo.png'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(u.pathname.includes('/api/'))return;if(event.request.method!=='GET'||u.origin!==self.location.origin)return;event.respondWith(fetch(event.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(event.request,copy));}return r;}).catch(()=>caches.match(event.request).then(r=>r||caches.match('./index.html'))));});

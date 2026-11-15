@@ -1,35 +1,52 @@
-# XAUUSD FAFA — v8.6.0
+# XAUUSD FAFA 9.0 — Advanced Analysis
 
-Application web mobile statique, conçue pour GitHub Pages et iPhone/iPad. Elle produit des analyses indicatives uniquement : elle n’envoie aucun ordre.
+Version mobile-first de l'assistant d'analyse XAUUSD. Elle ne passe aucun ordre.
 
-## Évolutions v8.6.0
-- Contexte supérieur H1 synthétisé à partir de paires de bougies M30 clôturées.
-- Analyse H1 / M30 / M15 / M5.
-- Indicateurs : EMA 20/50/200 (si historique suffisant), RSI 14, MACD, ADX 14 et ATR 14.
-- Structure de marché : supports/résistances récents, séquences de sommets/creux et balayages de liquidité simplifiés. Ce n’est pas une détection institutionnelle certifiée des Order Blocks/FVG.
-- Filtre d’extension : bloque une vente si RSI M5/M15 est en survente et un achat en surachat, en demandant un pullback/rejet.
-- Contrôle du stop (2,5 ATR), des obstacles structurels et d’un TP1 minimal (1,2R).
-- Justification explicite de NO TRADE et affichage de la session de marché.
-- Journal local des analyses (100 dernières), sans prétendre mesurer un win rate.
-- Tick indisponible : affichage éventuel de la dernière clôture, mais aucun signal exécutable.
-- Service worker et version des ressources actualisés.
+## Ce que fait réellement cette version
 
-## Installation
-1. Décompresser l’archive.
-2. Remplacer les fichiers existants à la racine du dépôt GitHub Pages par les fichiers de l’archive.
-3. Attendre la publication GitHub Pages, puis actualiser le site.
-4. Vérifier que l’en-tête indique v8.6.0. Sur iPhone, fermer/réouvrir l’onglet si l’ancienne version reste en cache.
+- Interface noire/or adaptée aux petits écrans, avec graphique large.
+- Analyse des bougies clôturées M5, M15 et M30 ; H1 est agrégé depuis M30.
+- EMA 20/50/200, RSI 14, MACD, ADX, ATR et structure swing simplifiée.
+- Contrôle du tick, de l'âge des cotations, de la cohérence prix/bougies et du spread.
+- Contrôle du calendrier US à fort impact fourni par Biquote ; calendrier indisponible = blocage du CALL.
+- Uniquement un CALL confirmé BUY/SELL dans le résultat principal. Sinon NO TRADE avec raisons.
+- Entrée, SL et TP1/TP2/TP3 calculés à partir de l'ATR et de niveaux structurels.
+- Journal local sur l'appareil.
+- Proxy Cloudflare Pages Function pour éviter les appels cross-origin directs au fournisseur.
 
-## Sources et limites
-- Bougies et tick : API publique Biquote (`https://biquote.io/api`).
-- Calendrier : endpoint public Biquote, annonces US classées haute importance. Il peut être incomplet ou indisponible ; dans ce cas l’analyse s’interrompt.
-- Graphique embarqué : TradingView OANDA:XAUUSD, qui peut différer du flux Biquote.
-- H1 est agrégé localement à partir de bougies M30 clôturées et n’est pas une cotation H1 native.
-- Le score technique n’est pas une probabilité de gain. Aucun backtest robuste ni validation hors échantillon n’est fourni. Tester en démo avant tout usage réel.
-- Le journal local stocke des décisions sur le navigateur, sans synchronisation entre appareils et sans suivi automatique des TP/SL.
-- Pas de promesse de rendement ni de taux de réussite.
+## Déploiement requis pour activer le backend gratuit
 
+Le ZIP contient les fichiers du site et une Cloudflare Pages Function dans `functions/api/[[path]].js`.
 
-## Évolutions v8.6.0
-- Les setups en attente affichent un biais BUY/SELL, des niveaux prévisionnels (entrée, SL, TP1/TP2/TP3), une confirmation attendue et une invalidation indicative.
-- Les niveaux restent explicitement non confirmés et sont masqués si la cotation temps réel ou le spread sont indisponibles, ou pendant une fenêtre d’annonce US bloquante.
+1. Décompresse cette archive.
+2. Crée un dépôt GitHub dédié ou remplace les fichiers de ton dépôt avec le contenu de l'archive (les fichiers `index.html`, `app.js`, `styles.css`, `functions/`, etc. doivent être à la racine).
+3. Dans Cloudflare, ouvre **Workers & Pages → Create → Pages → Connect to Git**.
+4. Sélectionne le dépôt GitHub.
+5. Framework preset : **None**. Build command : vide. Build output directory : `/`.
+6. Déploie. La fonction `/api/*` est alors exécutée côté Cloudflare et relaie les endpoints autorisés de Biquote.
+7. Ouvre l'URL Cloudflare Pages et teste les diagnostics. GitHub Pages seul n'exécute pas le dossier `functions/` : l'API proxy nécessite Cloudflare Pages.
+
+Le proxy n'ajoute pas de fournisseur de données premium et ne garantit pas la disponibilité de Biquote. Le plan gratuit a des quotas et limites d'exécution. Vérifier les conditions actuelles de Cloudflare avant déploiement.
+
+## Tests réalisés dans le package
+
+- Vérification syntaxique JavaScript de `app.js` et de la Pages Function.
+- Vérification de l'intégrité de l'archive.
+- Vérification statique des routes proxy autorisées et des contrôles de décision.
+
+## Limites techniques à connaître
+
+- Le flux de prix et de bougies est Biquote ; il peut différer du broker MT5 de l'utilisateur.
+- Le graphique intégré est TradingView OANDA:XAUUSD et sert de référence visuelle : il ne partage pas nécessairement le même flux que le moteur.
+- H1 est synthétisé à partir de M30, pas reçu comme une série H1 native.
+- La détection BOS/liquidité est une heuristique de swings, pas une identification institutionnelle certifiée des Order Blocks/FVG.
+- Le score /100 est un score technique interne, jamais une probabilité de gain.
+- Le calendrier Biquote peut être incomplet. En cas d'indisponibilité ou de format inattendu, aucun CALL confirmé n'est émis.
+- Aucun backtest robuste, test de slippage, ni validation hors échantillon n'est fourni dans cette archive. Le journal est local et ne suit pas automatiquement les TP/SL.
+- Pas d'entraînement ML, pas de flux CME temps réel, pas de notification Telegram dans cette version.
+- Tester en démo avant tout usage réel. Un signal confirmé n'est pas une garantie de résultat.
+
+## Données
+
+- Biquote API : `https://biquote.io/api`
+- TradingView : widget OANDA:XAUUSD (visualisation uniquement)
