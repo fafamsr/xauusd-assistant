@@ -1,4 +1,4 @@
-# XAUUSD FAFA 9.2 — Advanced Analysis
+# XAUUSD FAFA 9.3 — Advanced Analysis
 
 Version mobile-first de l'assistant d'analyse XAUUSD. Elle ne passe aucun ordre.
 
@@ -9,8 +9,10 @@ Version mobile-first de l'assistant d'analyse XAUUSD. Elle ne passe aucun ordre.
 - EMA 20/50/200, RSI 14, MACD, ADX, ATR et structure swing simplifiée.
 - Contrôle du tick, de l'âge des cotations, de la cohérence prix/bougies et du spread.
 - Contrôle du calendrier US à fort impact fourni par Biquote ; calendrier indisponible = blocage du CALL.
-- Uniquement un CALL confirmé BUY/SELL dans le résultat principal. Sinon NO TRADE avec raisons.
-- Entrée, SL et TP1/TP2/TP3 calculés à partir de l'ATR et de niveaux structurels.
+- Distinction entre biais directionnel et CALL confirmé BUY/SELL ; les setups non confirmés restent en attente.
+- Entrée, SL et TP1/TP2/TP3 indicatifs calculés à partir de l’ATR et de niveaux structurels ; R/R affiché pour chaque objectif.
+- Un CALL confirmé exige un R/R TP1 d’au moins 1,5, un déclencheur M5 clôturé et les confirmations de structure, tendance et momentum.
+- Score technique plafonné à 100 et distinct d’une probabilité de gain.
 - Journal local sur l'appareil.
 - Proxy Cloudflare Pages Function pour éviter les appels cross-origin directs au fournisseur.
 
