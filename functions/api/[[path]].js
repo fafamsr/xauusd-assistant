@@ -1,4 +1,3 @@
-
 const UPSTREAM = 'https://biquote.io/api';
 const ALLOWED = [
   /^XAUUSD$/,
@@ -6,13 +5,34 @@ const ALLOWED = [
   /^calendar\/upcoming$/
 ];
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Accept, Content-Type',
+  'Access-Control-Max-Age': '86400',
+  'Cache-Control': 'no-store, max-age=0'
+};
+
 export async function onRequest(context) {
   const { request, params } = context;
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (request.method !== 'GET') {
+    return Response.json({ error: 'Méthode non autorisée' }, {
+      status: 405, headers: corsHeaders
+    });
+  }
+
   const parts = params.path;
   const path = Array.isArray(parts) ? parts.join('/') : String(parts || '');
 
   if (!ALLOWED.some((rule) => rule.test(path))) {
-    return Response.json({ error: 'Endpoint non autorisé' }, { status: 404 });
+    return Response.json({ error: 'Endpoint non autorisé' }, {
+      status: 404, headers: corsHeaders
+    });
   }
 
   const incoming = new URL(request.url);
@@ -27,15 +47,14 @@ export async function onRequest(context) {
       method: 'GET',
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'XAUUSD-FAFA/9.0'
+        'User-Agent': 'XAUUSD-FAFA/9.2.0'
       },
       cf: { cacheTtl: 0, cacheEverything: false }
     });
 
-    const headers = new Headers(upstream.headers);
-    headers.set('Cache-Control', 'no-store, max-age=0');
+    const headers = new Headers(corsHeaders);
+    headers.set('Content-Type', upstream.headers.get('Content-Type') || 'application/json');
     headers.set('X-FAFA-Data-Source', 'Biquote-proxy');
-    headers.delete('Access-Control-Allow-Origin');
 
     return new Response(upstream.body, {
       status: upstream.status,
@@ -46,8 +65,7 @@ export async function onRequest(context) {
       error: 'Fournisseur de données indisponible',
       detail: String(error?.message || error)
     }, {
-      status: 502,
-      headers: { 'Cache-Control': 'no-store' }
+      status: 502, headers: corsHeaders
     });
   }
 }
