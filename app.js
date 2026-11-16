@@ -1,7 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const API='/api';
-const VERSION='FAFA-9.1.0';
+const API='https://xauusd-assistant.pages.dev/api';
+const VERSION='FAFA-9.2.0';
 const NEWS_API=`${API}/calendar/upcoming?limit=100&importance=high&countries=US`;
 const NEWS_BLOCK_BEFORE_MIN=30, NEWS_BLOCK_AFTER_MIN=15;
 const fmt=n=>Number.isFinite(n)?n.toFixed(2):'—';
