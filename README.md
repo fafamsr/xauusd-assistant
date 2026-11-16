@@ -1,4 +1,4 @@
-# XAUUSD FAFA 9.0 — Advanced Analysis
+# XAUUSD FAFA 9.1 — Advanced Analysis
 
 Version mobile-first de l'assistant d'analyse XAUUSD. Elle ne passe aucun ordre.
 
